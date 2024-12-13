@@ -404,7 +404,7 @@ public class MainWindow extends JFrame implements Observer {
     private void generateReport() {
         String format = (String) reportFormatCombo.getSelectedItem();
         ReportStrategy strategy = switch (format) {
-            case "CSV" -> new CSVReportStrategy();
+            case "TABELA" -> new CSVReportStrategy();
             case "HTML" -> new HTMLReportStrategy();
             default -> new JSONReportStrategy();
         };
