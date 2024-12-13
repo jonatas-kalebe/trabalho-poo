@@ -1,0 +1,196 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+
+package "entidades" {
+    class Course {
+        -int courseId
+        -String name
+        -Professor professor
+        -List<Student> enrolledStudents
+        +Course(int, String, Professor)
+        +getCourseId(): int
+        +getName(): String
+        +getProfessor(): Professor
+        +getEnrolledStudents(): List<Student>
+        +enrollStudent(Student): void
+        +toString(): String
+    }
+
+    class Professor {
+        -int id
+        -String name
+        -String formacao
+        +Professor(int, String, String)
+        +getId(): int
+        +getName(): String
+        +getFormacao(): String
+        +toString(): String
+    }
+
+    class Student {
+        -int id
+        -String name
+        +Student(int, String)
+        +getId(): int
+        +getName(): String
+        +toString(): String
+    }
+}
+
+package "factory" {
+    abstract class CourseFactory {
+        {abstract}+createCourse(int id, String name, Professor professor): Course
+    }
+
+    class DefaultCourseFactory extends CourseFactory {
+        +createCourse(int, String, Professor): Course
+    }
+}
+
+package "iterator" {
+    class CourseCollection {
+        -List<Course> courses
+        +addCourse(Course): void
+        +iterator(): CourseIterator
+        +getAllCourses(): List<Course>
+    }
+
+    class CourseIterator {
+        -List<Course> courses
+        -int index
+        +CourseIterator(List<Course>)
+        +hasNext(): boolean
+        +next(): Course
+        +remove(): void
+    }
+}
+
+package "observer" {
+    interface Observer {
+        +update(): void
+    }
+
+    interface Subject {
+        +registerObserver(Observer): void
+        +removeObserver(Observer): void
+        +notifyObservers(): void
+    }
+}
+
+package "manager" {
+    class CourseManager implements Subject {
+        -static CourseManager instance
+        -CourseCollection courseCollection
+        -List<Student> students
+        -List<Professor> professors
+        -List<Observer> observers
+        -CourseFactory courseFactory
+        -CourseManager()
+        +getInstance(): CourseManager
+        +createCourse(int, String, Professor): Course
+        +addStudent(int, String): Student
+        +addProfessor(int, String, String): Professor
+        +getCourseCollection(): CourseCollection
+        +getStudents(): List<Student>
+        +getProfessors(): List<Professor>
+        +enrollStudentInCourse(int, int): void
+        +saveData(): void
+        +loadData(): void
+        +getAllDataAsJson(): String
+        +registerObserver(Observer): void
+        +removeObserver(Observer): void
+        +notifyObservers(): void
+    }
+}
+
+package "thread" {
+    class AutoSaveThread extends Thread {
+        -boolean running
+        +run(): void
+        +stopRunning(): void
+    }
+}
+
+package "util" {
+    interface ReportStrategy {
+        +generateReport(CourseCollection): String
+    }
+
+    class CSVReportStrategy implements ReportStrategy {
+        +generateReport(CourseCollection): String
+    }
+
+    class HTMLReportStrategy implements ReportStrategy {
+        +generateReport(CourseCollection): String
+    }
+
+    class JSONReportStrategy implements ReportStrategy {
+        +generateReport(CourseCollection): String
+    }
+}
+
+package "ui" {
+    class MainWindow extends JFrame implements Observer {
+        -CourseManager manager
+        -JTextArea reportArea
+        -JComboBox<String> reportFormatCombo
+        -JTextField courseIdField
+        -JTextField courseNameField
+        -JTextField professorSearchField
+        -DefaultListModel<Professor> professorListModel
+        -JList<Professor> professorList
+        -JTextField profIdField
+        -JTextField profNameField
+        -JTextField profFormacaoField
+        -JTextField studentIdField
+        -JTextField studentNameField
+        -JTextField studentCourseSearchField
+        -DefaultListModel<Course> studentCourseListModel
+        -JList<Course> studentCourseList
+        -JTextField enrollStudentSearchField
+        -JTextField enrollCourseSearchField
+        -DefaultListModel<Student> enrollStudentListModel
+        -JList<Student> enrollStudentList
+        -DefaultListModel<Course> enrollCourseListModel
+        -JList<Course> enrollCourseList
+        +MainWindow()
+        +update(): void
+    }
+}
+
+package "main" {
+    class Main {
+        +main(String[]): void
+    }
+}
+
+Course "1" --> "1" Professor
+Course "1" --> "*" Student
+
+CourseManager "1" --> "1" CourseCollection
+CourseManager "1" --> "*" Student
+CourseManager "1" --> "*" Professor
+CourseManager "1" --> "*" Observer
+CourseManager "1" --> "1" CourseFactory
+
+CourseCollection "1" --> "*" Course
+CourseIterator "1" --> "*" Course
+
+CourseFactory <|-- DefaultCourseFactory
+
+Subject <|.. CourseManager
+Observer <|.. MainWindow
+
+ReportStrategy <|.. CSVReportStrategy
+ReportStrategy <|.. HTMLReportStrategy
+ReportStrategy <|.. JSONReportStrategy
+
+Thread <|-- AutoSaveThread
+
+MainWindow "1" --> "1" CourseManager
+Main "1" --> "1" CourseManager
+Main "1" --> "1" MainWindow
+AutoSaveThread "1" --> "1" CourseManager
+
+@enduml
